@@ -3,11 +3,13 @@ import React, { useEffect, useState } from "react";
 import { useParams, useLocation, useNavigate } from "react-router-dom";
 import "./Home.css";
 
-const API_KEY = "e57ed672f332201311e63165d765cdd6";
+// ✅ Use your new TMDB API key
+const API_KEY = import.meta.env.VITE_TMDB_KEY || "eeec6858ccc8ea28e5972fba3c3e55c4";
+
+// ✅ Use backend URL from env (works for Render + local)
+const BACKEND_URL = import.meta.env.VITE_API_URL || "https://cinezone-project.onrender.com";
 const IMAGE_BASE_URL = "https://image.tmdb.org/t/p/w500";
-const BACKEND_URL = "http://localhost:5000";
 const user = localStorage.getItem("userEmail") || "guest";
- // 🔒 later replace with logged-in user
 
 function MovieDetails() {
   const { id } = useParams();
@@ -19,7 +21,7 @@ function MovieDetails() {
   const [error, setError] = useState(null);
   const [favorites, setFavorites] = useState([]);
 
-  // ✅ Fetch user's favorites (for persistent likes)
+  // ✅ Fetch user's favorites
   useEffect(() => {
     const fetchFavorites = async () => {
       try {
@@ -37,11 +39,8 @@ function MovieDetails() {
   const toggleFavorite = async (movie) => {
     const isFav = favorites.includes(movie.id);
 
-    // 💥 Optimistic UI update (instant color change)
     if (isFav) {
       setFavorites((prev) => prev.filter((id) => id !== movie.id));
-
-      // tell backend to remove
       try {
         await fetch(`${BACKEND_URL}/api/favorites/${movie.id}/${user}`, {
           method: "DELETE",
@@ -52,8 +51,6 @@ function MovieDetails() {
       }
     } else {
       setFavorites((prev) => [...prev, movie.id]);
-
-      // tell backend to add
       try {
         await fetch(`${BACKEND_URL}/api/favorites`, {
           method: "POST",
@@ -73,7 +70,7 @@ function MovieDetails() {
     }
   };
 
-  // ✅ Fetch movie details from TMDb (if not passed)
+  // ✅ Fetch movie details if not passed from Home
   useEffect(() => {
     if (!movie && id) {
       const fetchMovie = async () => {
@@ -138,7 +135,6 @@ function MovieDetails() {
         <p><strong>Genres:</strong> {movie.genres?.map((g) => g.name).join(", ")}</p>
         <p><strong>Language:</strong> {movie.original_language?.toUpperCase()}</p>
 
-        {/* ❤️ Like button */}
         <button
           onClick={() => toggleFavorite(movie)}
           className={`like-button ${favorites.includes(movie.id) ? "liked" : ""}`}

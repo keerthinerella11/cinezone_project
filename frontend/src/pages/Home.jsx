@@ -2,11 +2,11 @@ import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "./Home.css";
 
-const API_KEY = "e57ed672f332201311e63165d765cdd6"; // TMDB key
+// ✅ Use environment variable for flexibility
+const API_KEY = import.meta.env.VITE_TMDB_KEY || "eeec6858ccc8ea28e5972fba3c3e55c4"; // TMDB key
 
-// ✅ Fallback for both production & local testing
-const BACKEND_URL =
-  import.meta.env.VITE_API_URL || "http://localhost:5000";
+// ✅ Use Render backend URL for production, localhost for local testing
+const BACKEND_URL = import.meta.env.VITE_API_URL || "https://cinezone-project.onrender.com";
 
 const Home = () => {
   const navigate = useNavigate();
