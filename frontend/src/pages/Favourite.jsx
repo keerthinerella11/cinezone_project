@@ -6,13 +6,14 @@ function Favourite() {
   const [loading, setLoading] = useState(true);
 
   const userEmail = localStorage.getItem("userEmail");
+  const BACKEND_URL = import.meta.env.VITE_API_URL; // ✅ Use env variable
 
   useEffect(() => {
     if (!userEmail) return;
 
     const fetchFavourites = async () => {
       try {
-        const res = await axios.get(`http://localhost:5000/api/favorites/${userEmail}`);
+        const res = await axios.get(`${BACKEND_URL}/api/favorites/${userEmail}`);
         setFavourites(res.data);
       } catch (err) {
         console.error("❌ Error fetching favourites:", err);
@@ -22,11 +23,11 @@ function Favourite() {
     };
 
     fetchFavourites();
-  }, [userEmail]);
+  }, [userEmail, BACKEND_URL]);
 
   const handleRemove = async (movieId) => {
     try {
-      await axios.delete(`http://localhost:5000/api/favorites/${movieId}/${userEmail}`);
+      await axios.delete(`${BACKEND_URL}/api/favorites/${movieId}/${userEmail}`);
       setFavourites(favourites.filter((fav) => fav.movieId !== movieId));
     } catch (err) {
       console.error("❌ Error removing favourite:", err);

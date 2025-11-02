@@ -2,8 +2,11 @@ import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "./Home.css";
 
-const API_KEY = "e57ed672f332201311e63165d765cdd6"; // your TMDb key
-const BACKEND_URL = "http://localhost:5000"; // backend base URL
+const API_KEY = "e57ed672f332201311e63165d765cdd6"; // TMDB key
+
+// ✅ Fallback for both production & local testing
+const BACKEND_URL =
+  import.meta.env.VITE_API_URL || "http://localhost:5000";
 
 const Home = () => {
   const navigate = useNavigate();
@@ -17,7 +20,7 @@ const Home = () => {
 
   const user = localStorage.getItem("userEmail") || "guest";
 
-  // 🔹 Initial load
+  // Load data on mount
   useEffect(() => {
     fetchGenres();
     fetchLanguages();
@@ -25,7 +28,7 @@ const Home = () => {
     fetchFavorites();
   }, []);
 
-  // 🔹 Fetch favorites
+  // Fetch user favourites
   const fetchFavorites = async () => {
     try {
       const res = await fetch(`${BACKEND_URL}/api/favorites/${user}`);
@@ -36,7 +39,7 @@ const Home = () => {
     }
   };
 
-  // 🔹 Toggle Like / Unlike
+  // Toggle Like / Unlike
   const toggleFavorite = async (movie) => {
     const isFav = favorites.includes(movie.id);
 
@@ -71,7 +74,7 @@ const Home = () => {
     }
   };
 
-  // 🔹 Fetch genres
+  // Fetch genres
   const fetchGenres = async () => {
     try {
       const res = await fetch(
@@ -84,7 +87,7 @@ const Home = () => {
     }
   };
 
-  // 🔹 Fetch languages
+  // Fetch languages
   const fetchLanguages = async () => {
     try {
       const res = await fetch(
@@ -97,7 +100,7 @@ const Home = () => {
     }
   };
 
-  // 🔹 Fetch movies
+  // Fetch movies
   const fetchMovies = async (language = "", genre = "") => {
     try {
       let url = `https://api.themoviedb.org/3/discover/movie?api_key=${API_KEY}&language=en-US&page=1`;
@@ -120,17 +123,21 @@ const Home = () => {
     }
   };
 
-  // 🔹 Search handler
+  // Search
   const handleSearch = async (e) => {
     e.preventDefault();
-    const res = await fetch(
-      `https://api.themoviedb.org/3/search/movie?api_key=${API_KEY}&query=${searchQuery}`
-    );
-    const data = await res.json();
-    setMovies(data.results || []);
+    try {
+      const res = await fetch(
+        `https://api.themoviedb.org/3/search/movie?api_key=${API_KEY}&query=${searchQuery}`
+      );
+      const data = await res.json();
+      setMovies(data.results || []);
+    } catch (err) {
+      console.error("Error searching movies:", err);
+    }
   };
 
-  // 🔹 Handle language & genre
+  // Filters
   const handleLanguageChange = (e) => {
     const lang = e.target.value;
     setSelectedLanguage(lang);
@@ -143,22 +150,19 @@ const Home = () => {
     fetchMovies(selectedLanguage, genre);
   };
 
-  // 🔹 Navigate to movie details
+  // Movie details
   const handleClick = (movie) => {
     navigate(`/movie/${movie.id}`, { state: { movie } });
   };
 
-  // 🔹 Logout handler
+  // Logout
   const handleLogout = () => {
-    localStorage.removeItem("token");
-    localStorage.removeItem("userEmail");
-    localStorage.removeItem("isAuthenticated");
-    navigate("/"); // ✅ Redirects to Auth.jsx
+    localStorage.clear();
+    navigate("/");
   };
 
   return (
     <div>
-      {/* Header */}
       <header className="top-nav">
         <div className="logo-section">
           <img src="/images/logo2.jpeg" alt="CineZone Logo" className="logo" />
@@ -170,7 +174,6 @@ const Home = () => {
           </div>
         </div>
 
-        {/* Filters */}
         <div className="filters">
           <form className="search-form" onSubmit={handleSearch}>
             <input
@@ -211,7 +214,6 @@ const Home = () => {
             ))}
           </select>
 
-          {/* ❤️ View Favourites Button */}
           <button
             onClick={() => navigate("/favourites")}
             className="view-fav-btn"
@@ -229,7 +231,6 @@ const Home = () => {
             ❤️ View Favourites
           </button>
 
-          {/* 🚪 Logout Button */}
           <button
             onClick={handleLogout}
             style={{
@@ -248,7 +249,6 @@ const Home = () => {
         </div>
       </header>
 
-      {/* Movie Section */}
       <section className="latest-section">
         <h2>
           {selectedGenre
