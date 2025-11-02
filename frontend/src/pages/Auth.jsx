@@ -10,7 +10,7 @@ function Auth() {
   const [loginPassword, setLoginPassword] = useState("");
 
   const navigate = useNavigate();
-  const API_BASE = "http://localhost:5000/api/users"; // ✅ your backend base URL
+  const API_BASE = `${import.meta.env.VITE_API_URL}/api/users`; // ✅ your backend base URL
 
   // ✅ SIGNUP
   const handleSignup = async (e) => {
